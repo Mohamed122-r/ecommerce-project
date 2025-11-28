@@ -3,11 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
+    unoptimized: true,
     domains: ['mohamedalamin.wuaze.com'],
-    unoptimized: true
   },
   trailingSlash: true,
-  output: 'export'
+  output: 'export',
+  env: {
+    NEXT_PUBLIC_API_URL: 'https://mohamedalamin.wuaze.com/api',
+  }
 }
 
 module.exports = nextConfig
