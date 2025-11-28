@@ -8,8 +8,15 @@ const nextConfig = {
   },
   trailingSlash: true,
   output: 'export',
+  distDir: 'out',
   env: {
     NEXT_PUBLIC_API_URL: 'https://mohamedalamin.wuaze.com/api',
+  },
+  // إعدادات مهمة لـ Vercel
+  poweredByHeader: false,
+  compress: true,
+  generateBuildId: async () => {
+    return 'ecommerce-build-' + Date.now()
   }
 }
 
