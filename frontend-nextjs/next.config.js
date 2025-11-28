@@ -4,18 +4,10 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['mohamedalamin.wuaze.com'],
+    unoptimized: true
   },
-  env: {
-    NEXT_PUBLIC_API_URL: 'https://mohamedalamin.wuaze.com/api',
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://mohamedalamin.wuaze.com/api/:path*',
-      },
-    ];
-  },
+  trailingSlash: true,
+  output: 'export'
 }
 
 module.exports = nextConfig
