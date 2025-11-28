@@ -1,124 +1,300 @@
-
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { productAPI } from '../lib/api';
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const fetchProducts = async () => {
       try {
-        const response = await productAPI.getFeaturedProducts();
-        setFeaturedProducts(response.data.data);
+        const response = await fetch('https://mohamedalamin.wuaze.com/api/products');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          // أخذ أول 8 منتجات للعرض
+          setProducts(data.data.slice(0, 8));
+        }
       } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('Error fetching products:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadProducts();
+    fetchProducts();
   }, []);
 
   return (
     <>
       <Head>
-        <title>متجر الإكسسوارات - أفضل إكسسوارات الجوالات</title>
-        <meta name="description" content="اكتشف أحدث إكسسوارات الجوالات من كفرات، شواحن، سماعات، وأكثر" />
+        <title>متجر الإكسسوارات - الرئيسية</title>
+        <meta name="description" content="متجر إكسسوارات الجوالات" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-l from-blue-600 to-purple-600 text-white py-20">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              أحدث إكسسوارات الجوالات
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
-              اكتشف مجموعة واسعة من الكفرات، الشواحن، السماعات، والإكسسوارات المميزة
+      <div style={styles.container}>
+        {/* الهيدر */}
+        <header style={styles.header}>
+          <div style={styles.nav}>
+            <h1 style={styles.logo}>📱 متجر الإكسسوارات</h1>
+            <nav style={styles.navLinks}>
+              <Link href="/" style={styles.navLink}>الرئيسية</Link>
+              <Link href="/products" style={styles.navLink}>المنتجات</Link>
+            </nav>
+          </div>
+        </header>
+
+        {/* قسم البطل */}
+        <section style={styles.hero}>
+          <div style={styles.heroContent}>
+            <h1 style={styles.heroTitle}>أحدث إكسسوارات الجوالات</h1>
+            <p style={styles.heroSubtitle}>
+              اكتشف مجموعة واسعة من الكفرات، الشواحن، السماعات والإكسسوارات المميزة
             </p>
-            <Link 
-              href="/products"
-              className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition duration-200"
-            >
+            <Link href="/products" style={styles.ctaButton}>
               تسوق الآن
             </Link>
           </div>
         </section>
 
-        {/* Featured Products */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">منتجات مميزة</h2>
-              <p className="text-gray-600 text-lg">أفضل الإكسسوارات المختارة بعناية</p>
-            </div>
+        {/* المنتجات المميزة */}
+        <section style={styles.productsSection}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.sectionTitle}>منتجات مميزة</h2>
+            <p style={styles.sectionSubtitle}>أفضل الإكسسوارات المختارة بعناية</p>
+          </div>
 
-            {loading ? (
-              <div className="flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {featuredProducts.map((product) => (
-                  <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-200">
-                    <Link href={`/product/${product.slug}`}>
-                      <div className="relative">
-                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-500">صورة المنتج</span>
-                        </div>
-                        {product.sale_price && (
-                          <span className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
-                            خصم
-                          </span>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-800 mb-2">{product.name}</h3>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            {product.sale_price ? (
-                              <>
-                                <span className="text-lg font-bold text-gray-800">
-                                  {product.sale_price} ر.س
-                                </span>
-                                <span className="text-sm text-gray-500 line-through">
-                                  {product.price} ر.س
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-lg font-bold text-gray-800">
-                                {product.price} ر.س
-                              </span>
-                            )}
-                          </div>
-                          <span className={`text-sm px-2 py-1 rounded ${
-                            product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {product.stock > 0 ? 'متوفر' : 'غير متوفر'}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
+          {loading ? (
+            <div style={styles.loading}>جاري التحميل...</div>
+          ) : (
+            <div style={styles.productsGrid}>
+              {products.map((product) => (
+                <div key={product.id} style={styles.productCard}>
+                  <div style={styles.productImage}>
+                    {product.sale_price && (
+                      <span style={styles.saleBadge}>خصم</span>
+                    )}
+                    <div style={styles.imagePlaceholder}>
+                      {product.name.charAt(0)}
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="text-center mt-12">
-              <Link 
-                href="/products"
-                className="inline-block bg-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
-              >
-                عرض جميع المنتجات
-              </Link>
+                  <div style={styles.productInfo}>
+                    <h3 style={styles.productName}>{product.name}</h3>
+                    <p style={styles.productCategory}>{product.category?.name}</p>
+                    <div style={styles.productPrice}>
+                      {product.sale_price ? (
+                        <>
+                          <span style={styles.currentPrice}>{product.sale_price} ر.س</span>
+                          <span style={styles.oldPrice}>{product.price} ر.س</span>
+                        </>
+                      ) : (
+                        <span style={styles.currentPrice}>{product.price} ر.س</span>
+                      )}
+                    </div>
+                    <span style={styles.stockStatus}>
+                      {product.stock > 0 ? '🟢 متوفر' : '🔴 غير متوفر'}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
+
+          <div style={styles.productsLink}>
+            <Link href="/products" style={styles.viewAllButton}>
+              عرض جميع المنتجات
+            </Link>
           </div>
         </section>
+
+        {/* الفوتر */}
+        <footer style={styles.footer}>
+          <p>© 2024 متجر الإكسسوارات. جميع الحقوق محفوظة.</p>
+        </footer>
       </div>
     </>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    fontFamily: 'Arial, sans-serif',
+  },
+  header: {
+    backgroundColor: 'white',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+    padding: '1rem 0',
+  },
+  nav: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0 1rem',
+  },
+  logo: {
+    color: '#3b82f6',
+    margin: 0,
+  },
+  navLinks: {
+    display: 'flex',
+    gap: '2rem',
+  },
+  navLink: {
+    color: '#4b5563',
+    textDecoration: 'none',
+    fontWeight: '500',
+  },
+  hero: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: '4rem 1rem',
+    textAlign: 'center',
+  },
+  heroContent: {
+    maxWidth: '800px',
+    margin: '0 auto',
+  },
+  heroTitle: {
+    fontSize: '3rem',
+    marginBottom: '1rem',
+    fontWeight: 'bold',
+  },
+  heroSubtitle: {
+    fontSize: '1.25rem',
+    marginBottom: '2rem',
+    opacity: 0.9,
+  },
+  ctaButton: {
+    display: 'inline-block',
+    backgroundColor: 'white',
+    color: '#3b82f6',
+    padding: '1rem 2rem',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
+  },
+  productsSection: {
+    maxWidth: '1200px',
+    margin: '4rem auto',
+    padding: '0 1rem',
+  },
+  sectionHeader: {
+    textAlign: 'center',
+    marginBottom: '3rem',
+  },
+  sectionTitle: {
+    fontSize: '2.5rem',
+    color: '#1f2937',
+    marginBottom: '1rem',
+  },
+  sectionSubtitle: {
+    fontSize: '1.125rem',
+    color: '#6b7280',
+  },
+  loading: {
+    textAlign: 'center',
+    fontSize: '1.25rem',
+    color: '#6b7280',
+    padding: '2rem',
+  },
+  productsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '2rem',
+    marginBottom: '3rem',
+  },
+  productCard: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    overflow: 'hidden',
+    transition: 'transform 0.2s',
+  },
+  productImage: {
+    position: 'relative',
+    height: '200px',
+    backgroundColor: '#f3f4f6',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saleBadge: {
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    backgroundColor: '#ef4444',
+    color: 'white',
+    padding: '0.25rem 0.5rem',
+    borderRadius: '4px',
+    fontSize: '0.875rem',
+  },
+  imagePlaceholder: {
+    width: '80px',
+    height: '80px',
+    backgroundColor: '#d1d5db',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '2rem',
+    color: '#6b7280',
+  },
+  productInfo: {
+    padding: '1.5rem',
+  },
+  productName: {
+    fontSize: '1.125rem',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '0.5rem',
+  },
+  productCategory: {
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    marginBottom: '1rem',
+  },
+  productPrice: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '1rem',
+  },
+  currentPrice: {
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  oldPrice: {
+    fontSize: '1rem',
+    color: '#9ca3af',
+    textDecoration: 'line-through',
+  },
+  stockStatus: {
+    fontSize: '0.875rem',
+  },
+  productsLink: {
+    textAlign: 'center',
+  },
+  viewAllButton: {
+    display: 'inline-block',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    padding: '1rem 2rem',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontWeight: 'bold',
+  },
+  footer: {
+    backgroundColor: '#1f2937',
+    color: 'white',
+    textAlign: 'center',
+    padding: '2rem 1rem',
+    marginTop: '4rem',
+  },
+};
